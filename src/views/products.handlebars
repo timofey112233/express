@@ -1,0 +1,18 @@
+<section>
+    <h2>Products</h2>
+
+    <div class="products">
+        {{#each products}}
+            <article class="product">
+                <h3>{{name}}</h2>
+                <p>Price: {{price}} BYN</p>
+                <p>Categoty: {{category}}</p>
+                <p>{{description}}</p>
+
+                <a href="/products/{{id}}">More info</a>
+            </article>
+        {{else}}
+            <p>No products available</p>
+        {{/each}}
+    </div>
+</section>

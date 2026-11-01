@@ -1,0 +1,16 @@
+<article class="product-detail">
+    <h2>{{product.name}}</h2>
+
+    <p>Article: {{product.id}}</p>
+    <p>Price: {{product.price}}</p>
+    <p>Category: {{product.category}}</p>
+    <p>{{product.description}}</p>
+
+    {{#if product.isAvailablle}}
+        <p>Product available</p>
+    {{else}}
+        <p>Product not available</p>
+    {{/if}}
+    
+    <a href="/products">To all products</a>
+</article>
