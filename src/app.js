@@ -1,10 +1,17 @@
 import express from 'express';
-import tasksRouter from './routes/tasks.js';
+// import tasksRouter from './routes/tasks.js';
 
 import products from "./data/products.js";
+import users from "./data/users.js";
 import { engine } from "express-handlebars";
 import path from "path";
 import hbs from "hbs";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 
 app.engine("handlebars", engine());
@@ -18,10 +25,10 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(express.json());
 
-app.use('./tasks', tasksRouter);
+// app.use('./tasks', tasksRouter);
 
 app.get("/", (req, res) => {
-    res.render("home", {title: "Main page", name: username});
+    res.render("home", {title: "Main page", name: "Timofey"});
 });
 
 app.get("/about", (req, res) => {
@@ -44,6 +51,8 @@ app.get("/products/sorted", (req, res) => {
     const sortedProducts = [...products].sort(
         (a, b) => a.price - b.price
     );
+
+    res.render("products", {title: "Sorted products", products: sortedProducts});
 });
 
 app.get("/products/:id", (req, res) => {
