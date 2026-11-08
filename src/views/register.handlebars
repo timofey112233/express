@@ -1,15 +1,19 @@
-<section>
+<section class="register log-reg">
     <h2>Register</h2>
 
-    <form action="">
-        <label for="register-name">Write your name</label>
-        <input name="register-name" type="text" placeholder="Name: ">
-        <label for="register-email">Write your email</label>
-        <input name="register-email" type="email" placeholder="Email: ">
-        <label for="register-password">Create new password</label>
-        <input name="register-password" type="password" placeholder="Password: " minlength="8">
-        <label for="register-repeat-password">Repeat new password</label>
-        <input name="register-repeat-password" type="password" placeholder="Repeat password: " minlength="8">
+    {{#if error}}
+        <p class="error">{{error}}</p>
+    {{/if}}
+
+    <form action="/register" method="POST">
+        <label>Name:</label>
+        <input name="name" type="text" placeholder="Name">
+        <label>Email:</label>
+        <input name="email" type="email" placeholder="email@gmail.com">
+        <label>Password:</label>
+        <input name="password" type="password" placeholder="password123" minlength="8">
+        <label>Repeat password:</label>
+        <input name="repeatPassword" type="password" placeholder="password123" minlength="8">
         <button>Register</button>
     </form>
 

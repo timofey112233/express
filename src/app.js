@@ -24,8 +24,19 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(express.json());
+//app.use(express.urlencoded({extended: true}));
+
+app.use(
+    session({
+        
+    })
+);
 
 // app.use('./tasks', tasksRouter);
+
+
+//    --- Get ---    //
+
 
 app.get("/", (req, res) => {
     res.render("home", {title: "Main page", name: "Timofey"});
@@ -69,13 +80,47 @@ app.get("/products/:id", (req, res) => {
     res.render("product", {title: product.name, product});
 });
 
-
 app.get("/register", (req, res) => {
-    res.render("register", {title: "Register"});
+    res.render("register", {title: "Register", error: null});
 });
 
 app.get("/login", (req, res) => {
-    res.render("login", {title: "Login"});
+    res.render("login", {title: "Login", error: null});
+});
+
+
+//    --- Post ---    //
+
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    const user = users.find(
+        (item) =>
+            item.email.toLowerCase() === email.toLowerCase() &&
+            item.password === password
+    );
+
+    if (!user) {
+        return res.render('login', {title: 'Login', error: 'Email or password'});
+    }
+
+    req.session.user = {
+        username: user.username,
+        email: user.email
+    };
+
+    res.redirect('/');
+});
+
+app.post('/register', (req, res) => {
+    
 });
 
 export default app;
