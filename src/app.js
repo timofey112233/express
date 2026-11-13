@@ -28,7 +28,9 @@ app.use(express.json());
 
 app.use(
     session({
-        
+        secret: process.env.SESSION_SECRET || 'secret',
+        resave: false,
+        saveUninitialized: false
     })
 );
 
@@ -39,6 +41,7 @@ app.use(
 
 
 app.get("/", (req, res) => {
+    if (!req.session.user) { return res.redirect('/login'); }
     res.render("home", {title: "Main page", name: "Timofey"});
 });
 
@@ -120,7 +123,31 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-    
+    const { name, email, password, repeatPawword } = req.body;
+
+    if (!name || !email || !password || !repeatPawword) {
+        return res.render('register', {title: 'register', error: 'Заполните все поля'});
+    }
+
+    if (password !== repeatPawword) {
+        return res.render('register', {title: 'register', error: 'Пароли не совпадают'});
+    }
+
+    const userExists = user.some(
+        (user) => user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (userExists) {
+        return res.render('register', {title: 'register', error: 'Пользователь с таким email уже существует'});
+    }
+
+    users.push({
+        name,
+        email: email.toLowerCase(),
+        password
+    });
+
+    res.redirect('/login');
 });
 
 export default app;

@@ -1,16 +1,17 @@
-<section class="login log-reg">
-    <h2>Login</h2>
+<section class="log-reg">
+    <div class="login">
+        <h2>Login</h2>
 
-    {{#if error}}
-        <p class="error">{{error}}</p>
-    {{/if}}
+        {{#if error}}
+            <p class="error">{{error}}</p>
+        {{/if}}
 
-    <form action="/login" method="POST">
-        <label>Email:</label>
-        <input name="email" type="email" placeholder="email@gmail.com">
-        <label>Password:</label>
-        <input name="password" type="password" placeholder="password123" minlength="8">
-        <button>Login</button>
-    </form>
-
+        <form action="/login" method="POST">
+            <label>Email:</label>
+            <input name="email" type="email" placeholder="email@gmail.com">
+            <label>Password:</label>
+            <input name="password" type="password" placeholder="password123" minlength="8">
+            <button>Login</button>
+        </form>
+    </div>
 </section>
