@@ -1,0 +1,16 @@
+<section>
+    <h2>Users</h2>
+
+    <div class="users">
+        {{#each users}}
+            <article class="user">
+                <h4>Id: {{id}}</h4>
+                <p>Name: {{name}}</p>
+                <p>Email: {{email}}</p>
+                <p>Password: {{password}}</p>
+            </article>
+        {{else}}
+            <p>No products available</p>
+        {{/each}}
+    </div>
+</section>

@@ -6,6 +6,7 @@ import users from "./data/users.js";
 import { engine } from "express-handlebars";
 import path from "path";
 import hbs from "hbs";
+import session from "express-session"
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
@@ -24,7 +25,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(express.json());
-//app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 
 app.use(
     session({
@@ -42,7 +43,7 @@ app.use(
 
 app.get("/", (req, res) => {
     if (!req.session.user) { return res.redirect('/login'); }
-    res.render("home", {title: "Main page", name: "Timofey"});
+    res.render("home", {title: "Main page", name: req.session.user.name});
 });
 
 app.get("/about", (req, res) => {
@@ -50,7 +51,13 @@ app.get("/about", (req, res) => {
 });
 
 app.get("/products", (req, res) => {
+    if (!req.session.user) { return res.redirect('/login'); }
     res.render("products", {title: "Products", products: products});
+});
+
+app.get("/users", (req, res) => {
+    if (!req.session.user) { return res.redirect('/login'); }
+    res.render("users", {title: "Users", users: users});
 });
 
 app.get("/products/cheap", (req, res) => {
@@ -70,10 +77,11 @@ app.get("/products/sorted", (req, res) => {
 });
 
 app.get("/products/:id", (req, res) => {
+    if (!req.session.user) { return res.redirect('/login'); }
     const productId = Number(req.params.id);
 
     const product = products.find(
-        item => item.id === 2
+        item => item.id === productId
     );
 
     if (!product) {
@@ -104,36 +112,36 @@ app.post('/logout', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    const user = users.find(
+    const localuser = users.find(
         (item) =>
             item.email.toLowerCase() === email.toLowerCase() &&
             item.password === password
     );
 
-    if (!user) {
-        return res.render('login', {title: 'Login', error: 'Email or password'});
+    if (!localuser) {
+        return res.render('login', {title: 'Login', error: 'Invalid email or password'});
     }
 
     req.session.user = {
-        username: user.username,
-        email: user.email
+        name: localuser.name,
+        email: localuser.email
     };
 
     res.redirect('/');
 });
 
 app.post('/register', (req, res) => {
-    const { name, email, password, repeatPawword } = req.body;
+    const { name, email, password, repeatPassword } = req.body;
 
-    if (!name || !email || !password || !repeatPawword) {
+    if (!name || !email || !password || !repeatPassword) {
         return res.render('register', {title: 'register', error: 'Заполните все поля'});
     }
 
-    if (password !== repeatPawword) {
+    if (password !== repeatPassword) {
         return res.render('register', {title: 'register', error: 'Пароли не совпадают'});
     }
 
-    const userExists = user.some(
+    const userExists = users.some(
         (user) => user.email.toLowerCase() === email.toLowerCase()
     );
 
