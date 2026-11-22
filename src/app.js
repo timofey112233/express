@@ -10,10 +10,17 @@ import session from "express-session"
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
+import bcrypt from 'bcryptjs';
+import User from './models/User.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+
+
+//    --- Set & Use ---    //
+
 
 app.engine("handlebars", engine());
 
@@ -109,28 +116,47 @@ app.post('/logout', (req, res) => {
     });
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    const localuser = users.find(
-        (item) =>
-            item.email.toLowerCase() === email.toLowerCase() &&
-            item.password === password
-    );
-
-    if (!localuser) {
-        return res.render('login', {title: 'Login', error: 'Invalid email or password'});
-    }
-
-    req.session.user = {
-        name: localuser.name,
-        email: localuser.email
-    };
-
-    res.redirect('/');
+    try {
+        const user = await User.findOne({
+            where: { email }
+        });
+      
+        if (!user) {
+            return res.render('login', {
+                title: 'Вход',
+                error: 'Неверный email или пароль.'
+            });
+        }
+      
+        const isPasswordCorrect = await bcrypt.compare(
+            password,
+            user.password
+        );
+      
+        if (!isPasswordCorrect) {
+            return res.render('login', {
+                title: 'Вход',
+                error: 'Неверный email или пароль.'
+            });
+        }
+      
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        };
+      
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Ошибка сервера.');
+    } 
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     const { name, email, password, repeatPassword } = req.body;
 
     if (!name || !email || !password || !repeatPassword) {
@@ -141,21 +167,30 @@ app.post('/register', (req, res) => {
         return res.render('register', {title: 'register', error: 'Пароли не совпадают'});
     }
 
-    const userExists = users.some(
-        (user) => user.email.toLowerCase() === email.toLowerCase()
-    );
+    try {
+        await User.create({
+            username: name,
+            email: email,
+            password: password
+        });
 
-    if (userExists) {
-        return res.render('register', {title: 'register', error: 'Пользователь с таким email уже существует'});
+        res.redirect('/login');
+    } catch(error) {
+        console.log(error);
+        let message = 'Не удалось зарегистрироватся';
+
+        if (error.username === 'SequalizeUniqueConstraintError') {
+            if (error.errors.some(item => item.path === 'name')) {
+                message = 'Такое имя уже занято';
+            } else if (error.errors.some(item => item.path === 'email')) {
+                message = 'Пользователь с таким email уже существует';
+            } else if (error.username === 'SequelizeValidationError') {
+                message = error.errors.map(item => item.message).join(' ');
+            }
+        }
+
+        res.render('register', {title: 'register', error: message});
     }
-
-    users.push({
-        name,
-        email: email.toLowerCase(),
-        password
-    });
-
-    res.redirect('/login');
 });
 
 export default app;
